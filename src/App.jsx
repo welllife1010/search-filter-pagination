@@ -9,6 +9,7 @@ function App() {
   const [items, setItems] = useState([])
   const [query, setQuery] = useState("")
   const [regionToFilter, setRegionToFilter] = useState("")
+  const [paginate, setPaginate] = useState(10)
 
   useEffect(() => {
     // const request_headers = new Headers()
@@ -39,6 +40,10 @@ function App() {
   const search_parameters = Object.keys(Object.assign({}, ...data))
   console.log("search_parameters", search_parameters)
 
+  // Return a new array that contain all of the unique values from the region property of each item in the data array.
+  const region_filter_options = [...new Set(data.map((item) => item.region))]
+  console.log("region_filter_options", region_filter_options)
+
   function search(items) {
     return items.filter(
       (item) =>
@@ -49,9 +54,9 @@ function App() {
     )
   }
 
-  // Return a new array that contain all of the unique values from the region property of each item in the data array.
-  const region_filter_options = [...new Set(data.map((item) => item.region))]
-  console.log("region_filter_options", region_filter_options)
+  const load_more = () => {
+    setPaginate((prevValue) => prevValue + 10)
+  }
 
   if (error) return <>{error.message}</>
   if (!loaded) return <>Loading...</>
@@ -80,7 +85,7 @@ function App() {
         >
           <option value="">Filter By Region</option>
           {region_filter_options.map((item) => (
-            <option key={item.alpha3Code} value={item}>
+            <option key={crypto.randomUUID()} value={item}>
               Filter By {item}
             </option>
           ))}
@@ -89,30 +94,34 @@ function App() {
       </div>
 
       <ul className="card-grid">
-        {search(data).map((item) => (
-          <li key={item.alpha3Code}>
-            <article className="card">
-              <div className="card-image">
-                <img src={item.flag.large} alt={item.name} />
-              </div>
-              <div className="card-content">
-                <h2 className="card-name">{item.name}</h2>
-                <ol className="card-list">
-                  <li>
-                    population: <span>{item.population}</span>
-                  </li>
-                  <li>
-                    Region: <span>{item.region}</span>
-                  </li>
-                  <li>
-                    Capital: <span>{item.capital}</span>
-                  </li>
-                </ol>
-              </div>
-            </article>
-          </li>
-        ))}
+        {search(data)
+          .slice(0, paginate)
+          .map((item) => (
+            <li key={item.alpha3Code}>
+              <article className="card">
+                <div className="card-image">
+                  <img src={item.flag.large} alt={item.name} />
+                </div>
+                <div className="card-content">
+                  <h2 className="card-name">{item.name}</h2>
+                  <ol className="card-list">
+                    <li>
+                      population: <span>{item.population}</span>
+                    </li>
+                    <li>
+                      Region: <span>{item.region}</span>
+                    </li>
+                    <li>
+                      Capital: <span>{item.capital}</span>
+                    </li>
+                  </ol>
+                </div>
+              </article>
+            </li>
+          ))}
       </ul>
+
+      <button onClick={load_more}>Load More</button>
     </div>
   )
 }
