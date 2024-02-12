@@ -8,7 +8,7 @@ function App() {
   const [loaded, setLoaded] = useState(false)
   const [items, setItems] = useState([])
   const [query, setQuery] = useState("")
-  const [filter, setFilter] = useState("")
+  const [regionToFilter, setRegionToFilter] = useState("")
 
   useEffect(() => {
     // const request_headers = new Headers()
@@ -33,24 +33,25 @@ function App() {
   }, [])
 
   const data = Object.values(items)
+  console.log("data", data)
 
   // Get all the keys of all the objects in the data array
   const search_parameters = Object.keys(Object.assign({}, ...data))
-
   console.log("search_parameters", search_parameters)
 
   function search(items) {
     return items.filter(
       (item) =>
-        item.region.includes(filter) &&
+        item.region.includes(regionToFilter) &&
         search_parameters.some((parameter) =>
           item[parameter].toString().toLowerCase().includes(query)
         )
     )
   }
 
-  // The new array will contain all of the unique values from the region property of each item in the data array.
-  const filter_items = [...new Set(data.map((item) => item.region))]
+  // Return a new array that contain all of the unique values from the region property of each item in the data array.
+  const region_filter_options = [...new Set(data.map((item) => item.region))]
+  console.log("region_filter_options", region_filter_options)
 
   if (error) return <>{error.message}</>
   if (!loaded) return <>Loading...</>
@@ -73,13 +74,15 @@ function App() {
 
       <div className="select">
         <select
-          onChange={(e) => setFilter(e.target.value)}
+          onChange={(e) => setRegionToFilter(e.target.value)}
           className="custom-select"
           aria-label="Filter Countries By Region"
         >
           <option value="">Filter By Region</option>
-          {filter_items.map((item) => (
-            <option value={item}>Filter By {item}</option>
+          {region_filter_options.map((item) => (
+            <option key={item.alpha3Code} value={item}>
+              Filter By {item}
+            </option>
           ))}
         </select>
         <span className="focus"></span>
